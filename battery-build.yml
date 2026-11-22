@@ -1,0 +1,30 @@
+name: Build BatteryInside
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack project zip
+        run: for z in *.zip; do unzip -oq "$z"; done
+      - name: Install Theos
+        uses: Randomblock1/theos-action@v1
+      - name: Build
+        run: make package FINALPACKAGE=1
+      - name: Rename package
+        run: cp packages/*.deb BatteryInside.deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BatteryInside-deb
+          path: BatteryInside.deb
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1
+          name: BatteryInside
+          files: BatteryInside.deb
